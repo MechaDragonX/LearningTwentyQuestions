@@ -6,7 +6,9 @@ import java.io.InputStreamReader;
 
 public class Main
 {
-    private static Tree<String> questions;
+    private static StringTree questions;
+    private static InputStreamReader stream = new InputStreamReader(System.in);
+    private static BufferedReader buffer = new BufferedReader(stream);
 
     public static void main(String[] args) throws IOException
     {
@@ -14,39 +16,40 @@ public class Main
     }
     private static void create(String question, String answer, boolean side) // true = left, false = right
     {
-        questions = new Tree<>(question);
+        questions = new StringTree(question);
         questions.addSide(answer, side, false);
     }
     private static void ask()
     {
-        if(questions.current.equals(questions.headRoot.left) || questions.current.equals(questions.headRoot.right))
-        {
-            System.out.println(questions.headRoot.value);
-        }
-        else
+//        if(questions.current.equals(questions.headRoot.left) || questions.current.equals(questions.headRoot.right))
+//        {
+//            System.out.println(questions.headRoot.value);
+//        }
+//        else
             System.out.println(questions.current.value);
     }
-    private static void checkAnswer(String answer)
+    private static boolean yesNo() throws IOException
     {
-        if(answer.equals("yes"))
+        String answer;
+        while(true)
         {
-            questions.next(true);
-            // ask();
-        }
-        else
-        {
-            questions.next(false);
-            // ask();
+            answer = buffer.readLine();
+            if(answer.equals("yes"))
+                return true;
+            else if(answer.equals("no"))
+                return false;
+            else
+                System.out.println("You can only type \"yes\" and \"no\"!");
         }
     }
     private static void execute() throws IOException
     {
-        create("Is it a boy?", "boy", true);
-        InputStreamReader stream = new InputStreamReader(System.in);
-        BufferedReader buffer = new BufferedReader(stream);
+        create("Does it fly?", "Is it a Canadian goose?", true);
+        questions.addSide("Canadian goose", true, false);
         boolean exited = false;
         boolean asked = false;
-        boolean comFail = false;
+        int round = 1;
+        int guess = -1; // 1: Guess successful, 0: Guess failed, -1: Did not guess
 
         System.out.println("My name is Sylvester and I'm gonna ask you a bunch of questions to try and guess what you're thinking! \\(^ v ^)/");
         // System.out.println("Please type a command!");
@@ -57,97 +60,107 @@ public class Main
             switch(command.toLowerCase())
             {
                 case "play":
-                    ask();
+                    // ask();
                     asked = true;
                     break;
                 case "exit":
                     exited = true;
                     break;
-//            default:
-//                System.out.println("That command is illegal!");
-//                break;
+                default:
+                    System.out.println("That command is illegal!");
+                    break;
             }
             if(exited)
                 break;
-
             if(asked)
             {
-                command = "";
-                while(true)
+                round++;
+                do
                 {
-                    command = buffer.readLine();
-                    if(command.toLowerCase().equals("yes"))
-                    {
-                        if(questions.current.left != null || questions.current.right != null)
-                            questions.next(true);
-                        break;
-                    }
-                    else if(command.toLowerCase().equals("no"))
-                    {
-                        if(questions.current.left != null || questions.current.right != null)
-                            questions.next(false);
-                        break;
-                    }
-                    else System.out.println("You can only type \"yes\" and \"no\"!");
-                }
-                String[] value;
-                value = questions.current.value.split("\\s");
-                if(value.length <= 2)
-                {
-                    System.out.println("My guess is \"" + questions.current.value + "\"!\nAm I right?");
-                }
-                command = "";
-                while(true)
-                {
-                    command = buffer.readLine();
-                    if(command.toLowerCase().equals("yes"))
-                    {
-                        System.out.println("Yay! I was right! :P");
-                        break;
-                    }
-                    else if(command.toLowerCase().equals("no"))
-                    {
-                        System.out.println("What!? T_T");
-                        comFail = true;
-                        break;
-                    }
+                    ask();
+                    if(checkAnswer())
+                        guess = tryGuess();
                     else
-                        System.out.println("You can only type \"yes\" and \"no\"!");
+                        guess = 0;
                 }
+                while(guess == -1);
+                if(guess == 0)
+                    addNewQuestion(round);
             }
 
-            if(comFail)
-            {
-                String question = "";
-                String answer = "";
-                boolean side = false;
-                String input = "";
-
-                System.out.println("What were you thinking of?");
-                answer = buffer.readLine();
-                System.out.println("What is a question I can use to improve guessing algorithm?");
-                question = buffer.readLine();
-                questions.addSide(question, false, true);
-                System.out.println("Does \"" + answer + "\" satisfy that question?");
-                while(true)
-                {
-                    input = buffer.readLine();
-                    if(input.toLowerCase().equals("yes"))
-                    {
-                        questions.addSide(answer, true, false);
-                        break;
-                    }
-                    else if(input.toLowerCase().equals("no"))
-                    {
-                        questions.addSide(answer, false, false);
-                        break;
-                    }
-                    else
-                        System.out.println("You can only type \"yes\" and \"no\"!");
-                }
-                System.out.println("Now I am smarter! :3");
-            }
+            exited = false;
+            asked = false;
+            guess = 0;
         }
         System.out.println("Thanks for playing!");
+    }
+
+    private static boolean checkAnswer() throws IOException
+    {
+        boolean retVal = true;
+        if(yesNo())
+        {
+            if(questions.current.left != null)
+                questions.next(true);
+            else
+            {
+                System.out.println("What!? You stumped me! T_T");
+                System.out.println("I guess you're not thinking of \"" + questions.current.left.value + "\"!");
+                retVal = false;
+            }
+        }
+        else
+        {
+            if(questions.current.right != null)
+                questions.next(false);
+            else
+            {
+                System.out.println("What!? You stumped me! T_T");
+                System.out.println("I guess you're not thinking of \"" + questions.current.left.value + "\"!");
+                retVal = false;
+            }
+        }
+        return retVal;
+    }
+    private static int tryGuess() throws IOException
+    {
+        String[] value;
+        value = questions.current.value.split("\\s");
+        if(value.length <= 2)
+        {
+            System.out.println("My guess is \"" + questions.current.value + "\"!\nAm I right?");
+        }
+        else
+            return -1; // Did not guess
+        if(yesNo())
+        {
+            System.out.println("Yay! I was right! :P");
+            return 1;
+        }
+        else
+        {
+            System.out.println("What!? T_T");
+            return 0;
+        }
+    }
+    private static void addNewQuestion(int round) throws IOException
+    {
+        String question;
+        String answer;
+
+        System.out.println("What were you thinking of?");
+        answer = buffer.readLine();
+        System.out.println("What is a question I can use to improve guessing algorithm?");
+        question = buffer.readLine();
+        if(round == 1)
+            questions.addSide(question, false, true);
+        else
+            questions.addSide(question, false, false);
+        System.out.println("Does \"" + answer + "\" satisfy that question?");
+        if(yesNo())
+            questions.addSide(answer, true, false);
+        else
+            questions.addSide(answer, false, false);
+        System.out.println("Now I am smarter! :3");
     }
 }

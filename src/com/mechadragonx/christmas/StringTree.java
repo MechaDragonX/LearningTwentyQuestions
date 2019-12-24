@@ -1,20 +1,20 @@
 package com.mechadragonx.christmas;
 
-public class Tree<T extends Comparable<T>>
+public class StringTree
 {
     protected class TreeNode
     {
-        public T value;
+        public String value;
         public TreeNode left;
         public TreeNode right;
 
-        public TreeNode(T value)
+        public TreeNode(String value)
         {
             this.value = value;
             left = null;
             right = null;
         }
-        public TreeNode(T value, TreeNode left, TreeNode right)
+        public TreeNode(String value, TreeNode left, TreeNode right)
         {
             this.value = value;
             this.left = left;
@@ -28,7 +28,7 @@ public class Tree<T extends Comparable<T>>
     // public boolean side; // true = left, false = right
     // public boolean bothSides; // true = both sides of previous covered, false = no
 
-    public Tree(T value)
+    public StringTree(String value)
     {
         initialize(value);
     }
@@ -37,34 +37,34 @@ public class Tree<T extends Comparable<T>>
 //        headRoot = new
 //    }
 
-    public void initialize(T value)
+    public void initialize(String value)
     {
         headRoot = new TreeNode(value);
         previous = headRoot;
         current = headRoot;
     }
 
-    public T next(boolean side) // true = left, false = right
+    public String next(boolean side) // true = left, false = right
     {
         if(side)
         {
             previous = current;
             current = current.left;
-            return current.left.value;
+            return current.value;
         }
         else
         {
             previous = current;
             current = current.right;
-            return current.right.value;
+            return current.value;
         }
     }
 
-    public void add(T value)
+    public void add(String value)
     {
         headRoot = add(headRoot, value);
     }
-    private TreeNode add(TreeNode root, T value)
+    private TreeNode add(TreeNode root, String value)
     {
         if(root == null)
             root = new TreeNode(value);
@@ -76,7 +76,7 @@ public class Tree<T extends Comparable<T>>
         return root;
     }
 
-    public void addSide(T value, boolean side, boolean toPrevious) // true = left, false = right
+    public void addSide(String value, boolean side, boolean toPrevious) // true = left, false = right
     {
         TreeNode newNode;
         if(toPrevious)

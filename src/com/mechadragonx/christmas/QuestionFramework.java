@@ -2,11 +2,11 @@ package com.mechadragonx.christmas;
 
 public class QuestionFramework
 {
-    private Tree<String> questions;
+    private StringTree questions;
 
     public QuestionFramework(String question, String answer, boolean side) // true = left, false = right
     {
-        questions = new Tree<>(question);
+        questions = new StringTree(question);
         // questions.addSide(answer, side);
     }
 
