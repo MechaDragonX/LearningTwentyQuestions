@@ -3,6 +3,8 @@ package com.mechadragonx.christmas;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Main
 {
@@ -66,6 +68,13 @@ public class Main
                 case "exit":
                     exited = true;
                     break;
+                case "save":
+                    questions.serialize();
+                    break;
+                case "load":
+                    StringTree newTree = StringTree.deserialize(readPath());
+                    questions = newTree;
+                    break;
                 default:
                     System.out.println("That command is illegal!");
                     break;
@@ -95,6 +104,25 @@ public class Main
         System.out.println("Thanks for playing!");
     }
 
+    private static Path readPath() throws IOException
+    {
+        System.out.println("Please type the path to my save file: ");
+        Path path;
+        while(true)
+        {
+            path = Paths.get(buffer.readLine());
+            if(!path.toFile().exists())
+                System.out.println("The specified path doesn't point to a file!");
+            else if(!isTextFile(path))
+                System.out.println("The specified path doesn't point to a text file!");
+            else
+                return path;
+        }
+    }
+    private static boolean isTextFile(Path path)
+    {
+        return path.toString().substring(path.toString().length() - 3).equals("sav");
+    }
     private static boolean checkAnswer() throws IOException
     {
         boolean retVal = true;
