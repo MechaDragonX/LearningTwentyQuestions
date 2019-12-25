@@ -23,12 +23,7 @@ public class Main
     }
     private static void ask()
     {
-//        if(questions.current.equals(questions.headRoot.left) || questions.current.equals(questions.headRoot.right))
-//        {
-//            System.out.println(questions.headRoot.value);
-//        }
-//        else
-            System.out.println(questions.current.value);
+        System.out.println(questions.current.value);
     }
     private static boolean yesNo() throws IOException
     {
@@ -54,15 +49,14 @@ public class Main
         int guess = -1; // 1: Guess successful, 0: Guess failed, -1: Did not guess
 
         System.out.println("My name is Sylvester and I'm gonna ask you a bunch of questions to try and guess what you're thinking! \\(^ v ^)/");
-        // System.out.println("Please type a command!");
         while(true)
         {
             questions.play();
+            System.out.println("Please type a command!");
             String command = buffer.readLine();
             switch(command.toLowerCase())
             {
                 case "play":
-                    // ask();
                     asked = true;
                     break;
                 case "exit":
@@ -72,8 +66,21 @@ public class Main
                     questions.serialize();
                     break;
                 case "load":
-                    StringTree newTree = StringTree.deserialize(readPath());
-                    questions = newTree;
+                    questions = StringTree.deserialize(readPath());
+                    break;
+                case "print":
+                    System.out.println("You need to specify *how* you want me to print the questions!");
+                    System.out.println("There are three ways you can do this: pre-order, in-order, and post-order!");
+                    System.out.println("You simply type \"print pre\", for example. You do not need to type \"order\"!");
+                    break;
+                case "print pre":
+                    questions.print(TraversalType.pre);
+                    break;
+                case "print in":
+                    questions.print(TraversalType.in);
+                    break;
+                case "print post":
+                    questions.print(TraversalType.post);
                     break;
                 default:
                     System.out.println("That command is illegal!");
@@ -100,6 +107,7 @@ public class Main
             exited = false;
             asked = false;
             guess = 0;
+            System.out.println(); // A new line to break up command cycles
         }
         System.out.println("Thanks for playing!");
     }
@@ -113,16 +121,17 @@ public class Main
             path = Paths.get(buffer.readLine());
             if(!path.toFile().exists())
                 System.out.println("The specified path doesn't point to a file!");
-            else if(!isTextFile(path))
+            else if(!isSavFile(path))
                 System.out.println("The specified path doesn't point to a text file!");
             else
                 return path;
         }
     }
-    private static boolean isTextFile(Path path)
+    private static boolean isSavFile(Path path)
     {
         return path.toString().substring(path.toString().length() - 3).equals("sav");
     }
+    
     private static boolean checkAnswer() throws IOException
     {
         boolean retVal = true;

@@ -186,5 +186,47 @@ public class StringTree implements Serializable
         return tree;
     }
 
-
+    public void print(TraversalType type)
+    {
+        switch(type)
+        {
+            case pre:
+                printPre(headRoot);
+                break;
+            case in:
+                printIn(headRoot);
+                break;
+            case post:
+                printPost(headRoot);
+                break;
+        }
+        System.out.println();
+    }
+    private void printPre(TreeNode root)
+    {
+        if(root != null)
+        {
+            System.out.println(root.value + "\t");
+            printPre(root.left);
+            printPre(root.right);
+        }
+    }
+    private void printIn(TreeNode root)
+    {
+        if(root != null)
+        {
+            printPre(root.left);
+            System.out.println(root.value + "\t");
+            printPre(root.right);
+        }
+    }
+    private void printPost(TreeNode root)
+    {
+        if(root != null)
+        {
+            printPre(root.left);
+            printPre(root.right);
+            System.out.println(root.value + "\t");
+        }
+    }
 }
